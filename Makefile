@@ -1,25 +1,28 @@
-# $Id: Makefile,v 1.36 2009/09/21 17:02:44 mascarenhas Exp $
-
-T= lfs
-
 CONFIG= ./config
 
 include $(CONFIG)
 
+T= lfs
+
 SRCS= src/$T.c
 OBJS= src/$T.o
 
-lib: src/lfs.so
+LUA_LIB= ../LuaJIT/src/libluajit-5.1.dll.a
 
-src/lfs.so: $(OBJS)
-	MACOSX_DEPLOYMENT_TARGET=$(MACOSX_DEPLOYMENT_TARGET); export MACOSX_DEPLOYMENT_TARGET; $(CC) $(LIB_OPTION) -o src/lfs.so $(OBJS)
+lib: src/lfs.a
+
+src/lfs.a: $(OBJS)
+	$(AR) rcs src/lfs.a $(OBJS)
+
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 test: lib
-	LUA_CPATH=./src/?.so lua tests/test.lua
+	LUA_CPATH=./src/?.a lua tests/test.lua
 
 install:
 	mkdir -p $(DESTDIR)$(LUA_LIBDIR)
-	cp src/lfs.so $(DESTDIR)$(LUA_LIBDIR)
+	cp src/lfs.a $(DESTDIR)$(LUA_LIBDIR)
 
 clean:
-	rm -f src/lfs.so $(OBJS)
+	rm -f src/lfs.a $(OBJS)
